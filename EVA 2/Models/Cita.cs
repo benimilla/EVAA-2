@@ -3,12 +3,16 @@
     public class Cita
     {
         public int Id { get; set; }
+
+        public int ClienteId { get; set; }
+        public Cliente Cliente { get; set; } = null!;
+
+        public int ServicioId { get; set; }
+        public Servicio Servicio { get; set; } = null!;
+
         public DateTime Fecha { get; set; }
         public TimeSpan Hora { get; set; }
-        public string Descripcion { get; set; }
-        public int ClienteId { get; set; }
-        public int ServicioId { get; set; }
-        public string Estado { get; set; } // Estado de la cita (Pendiente, Confirmada, Cancelada)
-        public string Comentarios { get; set; } // Comentarios adicionales sobre la cita
+        public string Estado { get; set; } = null!; // "Pendiente", "Confirmada", "Completada", "Cancelada"
+        public string? Comentarios { get; set; }
     }
 }
