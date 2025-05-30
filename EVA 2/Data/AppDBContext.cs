@@ -4,9 +4,9 @@ using System;
 
 namespace EVA_2.Data
 {
-    public class AppDbContext : DbContext
+    public class AppDBContext : DbContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        public AppDBContext(DbContextOptions<AppDBContext> options)
             : base(options)
         {
         }
