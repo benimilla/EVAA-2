@@ -1,3 +1,4 @@
+using EVA_2.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
