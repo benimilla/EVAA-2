@@ -20,9 +20,22 @@ namespace EVA_2.Controllers
         }
 
         // GET: Servicios
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string estado)
         {
-            return View(await _context.Servicios.ToListAsync());
+            var servicios = from s in _context.Servicios
+                            select s;
+
+            if (estado == "activos")
+            {
+                servicios = servicios.Where(s => s.Activo);
+            }
+            else if (estado == "inactivos")
+            {
+                servicios = servicios.Where(s => !s.Activo);
+            }
+
+            ViewData["EstadoActual"] = estado;
+            return View(await servicios.ToListAsync());
         }
 
         // GET: Servicios/Details/5
