@@ -50,8 +50,6 @@ namespace EVA_2.Controllers
         }
 
         // POST: Clientes/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nombre,Apellido,Email,Telefono,FechaRegistro")] Cliente cliente)
@@ -82,8 +80,6 @@ namespace EVA_2.Controllers
         }
 
         // POST: Clientes/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Apellido,Email,Telefono,FechaRegistro")] Cliente cliente)
@@ -140,12 +136,21 @@ namespace EVA_2.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente != null)
+            if (cliente == null)
             {
-                _context.Clientes.Remove(cliente);
+                return NotFound();
             }
 
+            bool tieneCitas = await _context.Citas.AnyAsync(c => c.ClienteId == id);
+            if (tieneCitas)
+            {
+                ModelState.AddModelError(string.Empty, "No se puede eliminar el cliente porque tiene citas asociadas.");
+                return View(cliente);
+            }
+
+            _context.Clientes.Remove(cliente);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

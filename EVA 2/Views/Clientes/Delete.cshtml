@@ -6,6 +6,15 @@
 
 <h1>Delete</h1>
 
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
+}
 <h3>Are you sure you want to delete this?</h3>
 <div>
     <h4>Cliente</h4>

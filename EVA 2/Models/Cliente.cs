@@ -8,6 +8,6 @@
         public string Email { get; set; } = null!;
         public string Telefono { get; set; } = null!;
         public DateTime FechaRegistro { get; set; }
-        //aloo
+        
     }
 }
