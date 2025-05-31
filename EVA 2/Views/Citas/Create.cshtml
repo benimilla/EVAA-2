@@ -31,9 +31,16 @@
                 <span asp-validation-for="Hora" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Estado" class="control-label"></label>
-                <input asp-for="Estado" class="form-control" />
-                <span asp-validation-for="Estado" class="text-danger"></span>
+                <label for="EstadoId">Seleccionar Estado:</label>
+                <select asp-for="EstadoId" asp-items="ViewBag.Estados" class="form-control">
+                    <option value="">-- Seleccionar --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Nuevo estado (si no existe)</label>
+                <input type="text" name="nuevoEstadoNombre" class="form-control" />
+                <small class="form-text text-muted">Si escribes uno nuevo, se creará automáticamente.</small>
             </div>
             <div class="form-group">
                 <label asp-for="Comentarios" class="control-label"></label>

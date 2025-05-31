@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using EVA_2.Data;
+using EVA_2.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using EVA_2.Data;
-using EVA_2.Models;
 
 namespace EVA_2.Controllers
 {
@@ -22,26 +18,25 @@ namespace EVA_2.Controllers
         // GET: Citas
         public async Task<IActionResult> Index()
         {
-            var appDBContext = _context.Citas.Include(c => c.Cliente).Include(c => c.Servicio);
-            return View(await appDBContext.ToListAsync());
+            var citas = _context.Citas
+                .Include(c => c.Cliente)
+                .Include(c => c.Servicio)
+                .Include(c => c.Estado); // <- Asegura incluir Estado
+            return View(await citas.ToListAsync());
         }
 
         // GET: Citas/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var cita = await _context.Citas
                 .Include(c => c.Cliente)
                 .Include(c => c.Servicio)
+                .Include(c => c.Estado)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (cita == null)
-            {
-                return NotFound();
-            }
+
+            if (cita == null) return NotFound();
 
             return View(cita);
         }
@@ -49,102 +44,109 @@ namespace EVA_2.Controllers
         // GET: Citas/Create
         public IActionResult Create()
         {
-            ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido");
-            ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion");
+            ViewBag.Clientes = new SelectList(_context.Clientes, "Id", "Nombre");
+            ViewBag.Servicios = new SelectList(_context.Servicios, "Id", "Nombre");
+            ViewBag.Estados = new SelectList(_context.Estados, "Id", "Nombre");
             return View();
         }
 
         // POST: Citas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ClienteId,ServicioId,Fecha,Hora,Estado,Comentarios")] Cita cita)
+        public IActionResult Create(Cita cita, string nuevoEstadoNombre)
         {
+            if (!string.IsNullOrWhiteSpace(nuevoEstadoNombre))
+            {
+                var estadoExistente = _context.Estados.FirstOrDefault(e => e.Nombre.ToLower() == nuevoEstadoNombre.ToLower());
+                if (estadoExistente != null)
+                {
+                    cita.EstadoId = estadoExistente.Id;
+                }
+                else
+                {
+                    var nuevoEstado = new Estado { Nombre = nuevoEstadoNombre };
+                    _context.Estados.Add(nuevoEstado);
+                    _context.SaveChanges();
+                    cita.EstadoId = nuevoEstado.Id;
+                }
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(cita);
-                await _context.SaveChangesAsync();
+                _context.Citas.Add(cita);
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
 
-            
-
-            ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido", cita.ClienteId);
-            ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion", cita.ServicioId);
+            ViewBag.Clientes = new SelectList(_context.Clientes, "Id", "Nombre", cita.ClienteId);
+            ViewBag.Servicios = new SelectList(_context.Servicios, "Id", "Nombre", cita.ServicioId);
+            ViewBag.Estados = new SelectList(_context.Estados, "Id", "Nombre", cita.EstadoId);
             return View(cita);
         }
+
         // GET: Citas/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var cita = await _context.Citas.FindAsync(id);
-            if (cita == null)
-            {
-                return NotFound();
-            }
-            ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido", cita.ClienteId);
-            ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion", cita.ServicioId);
+            if (cita == null) return NotFound();
+
+            ViewBag.Clientes = new SelectList(_context.Clientes, "Id", "Nombre", cita.ClienteId);
+            ViewBag.Servicios = new SelectList(_context.Servicios, "Id", "Nombre", cita.ServicioId);
+            ViewBag.Estados = new SelectList(_context.Estados, "Id", "Nombre", cita.EstadoId);
+
             return View(cita);
         }
 
         // POST: Citas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ClienteId,ServicioId,Fecha,Hora,Estado,Comentarios")] Cita cita)
+        public IActionResult Edit(int id, Cita cita, string nuevoEstadoNombre)
         {
-            if (id != cita.Id)
+            if (id != cita.Id) return NotFound();
+
+            if (!string.IsNullOrWhiteSpace(nuevoEstadoNombre))
             {
-                return NotFound();
+                var estadoExistente = _context.Estados.FirstOrDefault(e => e.Nombre.ToLower() == nuevoEstadoNombre.ToLower());
+                if (estadoExistente != null)
+                {
+                    cita.EstadoId = estadoExistente.Id;
+                }
+                else
+                {
+                    var nuevoEstado = new Estado { Nombre = nuevoEstadoNombre };
+                    _context.Estados.Add(nuevoEstado);
+                    _context.SaveChanges();
+                    cita.EstadoId = nuevoEstado.Id;
+                }
             }
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(cita);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CitaExists(cita.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _context.Update(cita);
+                _context.SaveChanges();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido", cita.ClienteId);
-            ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion", cita.ServicioId);
+
+            ViewBag.Clientes = new SelectList(_context.Clientes, "Id", "Nombre", cita.ClienteId);
+            ViewBag.Servicios = new SelectList(_context.Servicios, "Id", "Nombre", cita.ServicioId);
+            ViewBag.Estados = new SelectList(_context.Estados, "Id", "Nombre", cita.EstadoId);
             return View(cita);
         }
 
         // GET: Citas/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var cita = await _context.Citas
                 .Include(c => c.Cliente)
                 .Include(c => c.Servicio)
+                .Include(c => c.Estado)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (cita == null)
-            {
-                return NotFound();
-            }
+
+            if (cita == null) return NotFound();
 
             return View(cita);
         }
@@ -155,11 +157,7 @@ namespace EVA_2.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var cita = await _context.Citas.FindAsync(id);
-            if (cita != null)
-            {
-                _context.Citas.Remove(cita);
-            }
-
+            if (cita != null) _context.Citas.Remove(cita);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
