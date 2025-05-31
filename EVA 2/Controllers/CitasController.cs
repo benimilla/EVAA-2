@@ -59,7 +59,7 @@ namespace EVA_2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ClienteId,ServicioId,Fecha,Hora,Estado,Comentarios")] Cita cita)
+        public async Task<IActionResult> Create([Bind("ClienteId,ServicioId,Fecha,Hora,Estado,Comentarios")] Cita cita)
         {
             if (ModelState.IsValid)
             {
@@ -67,11 +67,13 @@ namespace EVA_2.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            
+
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido", cita.ClienteId);
             ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion", cita.ServicioId);
             return View(cita);
         }
-
         // GET: Citas/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {

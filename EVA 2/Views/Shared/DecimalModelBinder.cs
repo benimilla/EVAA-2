@@ -1,30 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
-using System;
+﻿
+namespace EVA_2.Views.Shared;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Globalization;
 using System.Threading.Tasks;
-namespace EVA_2.Views.Shared;
 
 public class DecimalModelBinder : IModelBinder
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        var valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
-
-        if (valueProviderResult == ValueProviderResult.None)
-        {
-            return Task.CompletedTask;
-        }
-
-        bindingContext.ModelState.SetModelValue(bindingContext.ModelName, valueProviderResult);
-
-        var value = valueProviderResult.FirstValue;
+        var value = bindingContext.ValueProvider.GetValue(bindingContext.ModelName).FirstValue;
 
         if (string.IsNullOrEmpty(value))
         {
+            bindingContext.Result = ModelBindingResult.Success(0m);
             return Task.CompletedTask;
         }
 
-        // Reemplazar coma por punto para la cultura invariante
         value = value.Replace(',', '.');
 
         if (decimal.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
@@ -33,7 +24,7 @@ public class DecimalModelBinder : IModelBinder
         }
         else
         {
-            bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, "El valor no es un número válido");
+            bindingContext.ModelState.TryAddModelError(bindingContext.ModelName, "El valor ingresado no es un número válido.");
         }
 
         return Task.CompletedTask;
