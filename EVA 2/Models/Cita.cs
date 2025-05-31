@@ -12,7 +12,7 @@
 
         public DateTime Fecha { get; set; }
         public TimeSpan Hora { get; set; }
-        public string Estado { get; set; } = null!; // "Pendiente", "Confirmada", "Completada", "Cancelada"
+        public string Estado { get; set; } = null!; // "Pendiente", "Confirmada", "Completada", "Cancelada", "Mas texto"
         public string? Comentarios { get; set; }
     }
 }
