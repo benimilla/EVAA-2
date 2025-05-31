@@ -19,7 +19,7 @@ namespace EVA_2.Controllers
             _context = context;
         }
 
-        // GET: Servicios
+        // GET: Servicioss
         public async Task<IActionResult> Index(string estado)
         {
             var servicios = from s in _context.Servicios
