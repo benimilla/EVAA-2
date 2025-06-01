@@ -51,12 +51,11 @@ namespace EVA_2.Controllers
         {
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido");
             ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion");
+            ViewBag.Estados = new SelectList(new List<string> { "Pendiente", "Confirmada", "Cancelada", "Completado" });
             return View();
         }
 
         // POST: Citas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ClienteId,ServicioId,Fecha,Hora,Estado,Comentarios")] Cita cita)
@@ -68,12 +67,12 @@ namespace EVA_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            
-
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido", cita.ClienteId);
             ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion", cita.ServicioId);
+            ViewBag.Estados = new SelectList(new List<string> { "Pendiente", "Confirmada", "Cancelada", "Completado" }, cita.Estado);
             return View(cita);
         }
+
         // GET: Citas/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -87,14 +86,14 @@ namespace EVA_2.Controllers
             {
                 return NotFound();
             }
+
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido", cita.ClienteId);
             ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion", cita.ServicioId);
+            ViewBag.Estados = new SelectList(new List<string> { "Pendiente", "Confirmada", "Cancelada", "Completado" }, cita.Estado);
             return View(cita);
         }
 
         // POST: Citas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,ClienteId,ServicioId,Fecha,Hora,Estado,Comentarios")] Cita cita)
@@ -124,8 +123,10 @@ namespace EVA_2.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["ClienteId"] = new SelectList(_context.Clientes, "Id", "Apellido", cita.ClienteId);
             ViewData["ServicioId"] = new SelectList(_context.Servicios, "Id", "Descripcion", cita.ServicioId);
+            ViewBag.Estados = new SelectList(new List<string> { "Pendiente", "Confirmada", "Cancelada", "Completado" }, cita.Estado);
             return View(cita);
         }
 
