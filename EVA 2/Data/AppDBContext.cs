@@ -14,7 +14,6 @@ namespace EVA_2.Data
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Servicio> Servicios { get; set; }
         public DbSet<Cita> Citas { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -48,7 +47,6 @@ namespace EVA_2.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Fecha).IsRequired();
                 entity.Property(e => e.Hora).IsRequired();
-                entity.Property(e => e.Estado).IsRequired();
 
                 entity.HasOne(e => e.Cliente)
                       .WithMany()
@@ -60,6 +58,10 @@ namespace EVA_2.Data
                       .HasForeignKey(e => e.ServicioId)
                       .OnDelete(DeleteBehavior.Cascade);
             });
+
+            // Relación con Estado
+   
+
         }
     }
 }
