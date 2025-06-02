@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using EVA_2.Data;
 using EVA_2.Models;
@@ -19,11 +17,10 @@ namespace EVA_2.Controllers
             _context = context;
         }
 
-        // GET: Servicioss
+        // GET: Servicios
         public async Task<IActionResult> Index(string estado)
         {
-            var servicios = from s in _context.Servicios
-                            select s;
+            var servicios = from s in _context.Servicios select s;
 
             if (estado == "activos")
             {
@@ -41,17 +38,10 @@ namespace EVA_2.Controllers
         // GET: Servicios/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var servicio = await _context.Servicios
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (servicio == null)
-            {
-                return NotFound();
-            }
+            var servicio = await _context.Servicios.FirstOrDefaultAsync(m => m.Id == id);
+            if (servicio == null) return NotFound();
 
             return View(servicio);
         }
@@ -63,14 +53,23 @@ namespace EVA_2.Controllers
         }
 
         // POST: Servicios/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nombre,Duracion,Descripcion,Precio,Activo")] Servicio servicio)
         {
+            // Validaciones manuales extra (además de DataAnnotations en el modelo)
+            if (string.IsNullOrWhiteSpace(servicio.Nombre))
+                ModelState.AddModelError("Nombre", "El nombre es obligatorio.");
+
+            if (servicio.Precio <= 0)
+                ModelState.AddModelError("Precio", "El precio debe ser un valor positivo.");
+
+            if (servicio.Duracion <= 0)
+                ModelState.AddModelError("Duracion", "La duración debe ser un valor positivo.");
+
             if (ModelState.IsValid)
             {
+                servicio.Activo = true; // Por defecto activo al crear
                 _context.Add(servicio);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -81,30 +80,29 @@ namespace EVA_2.Controllers
         // GET: Servicios/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var servicio = await _context.Servicios.FindAsync(id);
-            if (servicio == null)
-            {
-                return NotFound();
-            }
+            if (servicio == null) return NotFound();
+
             return View(servicio);
         }
 
         // POST: Servicios/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Duracion,Descripcion,Precio,Activo")] Servicio servicio)
         {
-            if (id != servicio.Id)
-            {
-                return NotFound();
-            }
+            if (id != servicio.Id) return NotFound();
+
+            if (string.IsNullOrWhiteSpace(servicio.Nombre))
+                ModelState.AddModelError("Nombre", "El nombre es obligatorio.");
+
+            if (servicio.Precio <= 0)
+                ModelState.AddModelError("Precio", "El precio debe ser un valor positivo.");
+
+            if (servicio.Duracion <= 0)
+                ModelState.AddModelError("Duracion", "La duración debe ser un valor positivo.");
 
             if (ModelState.IsValid)
             {
@@ -112,19 +110,14 @@ namespace EVA_2.Controllers
                 {
                     _context.Update(servicio);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
                     if (!ServicioExists(servicio.Id))
-                    {
                         return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    else throw;
                 }
-                return RedirectToAction(nameof(Index));
             }
             return View(servicio);
         }
@@ -132,33 +125,37 @@ namespace EVA_2.Controllers
         // GET: Servicios/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var servicio = await _context.Servicios
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (servicio == null)
-            {
-                return NotFound();
-            }
+            var servicio = await _context.Servicios.FirstOrDefaultAsync(m => m.Id == id);
+            if (servicio == null) return NotFound();
 
             return View(servicio);
         }
 
-        // POST: Servicios/Delete/5
+        // POST: Servicios/Delete/5 (Eliminación lógica)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var servicio = await _context.Servicios.FindAsync(id);
-            if (servicio != null)
+            if (servicio == null) return NotFound();
+
+            // Validar si tiene citas pendientes asociadas
+            bool tieneCitasPendientes = await _context.Citas
+                .AnyAsync(c => c.ServicioId == id && c.Estado == "Pendiente");
+
+            if (tieneCitasPendientes)
             {
-                _context.Servicios.Remove(servicio);
+                TempData["Error"] = "No se puede eliminar el servicio porque tiene citas pendientes asociadas.";
+                return RedirectToAction(nameof(Index));
             }
 
+            // Eliminación lógica: cambiar activo a false
+            servicio.Activo = false;
+            _context.Update(servicio);
             await _context.SaveChangesAsync();
+
             return RedirectToAction(nameof(Index));
         }
 

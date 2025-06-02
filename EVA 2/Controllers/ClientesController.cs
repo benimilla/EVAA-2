@@ -1,55 +1,80 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EVA_2.Data;
 using EVA_2.Models;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
 
 namespace EVA_2.Controllers
 {
     public class ClientesController : Controller
     {
         private readonly AppDBContext _context;
+        private const int pageSize = 10;
 
         public ClientesController(AppDBContext context)
         {
             _context = context;
         }
 
-        // GET: Clientes
-        public async Task<IActionResult> Index()
+        // Index con paginación y orden (por nombre o fecha)
+        public async Task<IActionResult> Index(string sortOrder, int page = 1)
         {
-            return View(await _context.Clientes.ToListAsync());
+            ViewBag.NombreSortParm = string.IsNullOrEmpty(sortOrder) ? "nombre_desc" : "";
+            ViewBag.FechaSortParm = sortOrder == "fecha" ? "fecha_desc" : "fecha";
+
+            var clientes = from c in _context.Clientes select c;
+
+            switch (sortOrder)
+            {
+                case "nombre_desc":
+                    clientes = clientes.OrderByDescending(c => c.Nombre);
+                    break;
+                case "fecha":
+                    clientes = clientes.OrderBy(c => c.FechaRegistro);
+                    break;
+                case "fecha_desc":
+                    clientes = clientes.OrderByDescending(c => c.FechaRegistro);
+                    break;
+                default:
+                    clientes = clientes.OrderBy(c => c.Nombre);
+                    break;
+            }
+
+            var totalClientes = await clientes.CountAsync();
+            var totalPaginas = (int)Math.Ceiling((double)totalClientes / pageSize);
+
+            var clientesPaginados = await clientes
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.PaginaActual = page;
+            ViewBag.TotalPaginas = totalPaginas;
+            ViewBag.SortOrder = sortOrder;
+
+            return View(clientesPaginados);
         }
 
-        // GET: Clientes/Details/5
+        // Detalles
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var cliente = await _context.Clientes
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Id == id);
+            if (cliente == null) return NotFound();
 
             return View(cliente);
         }
 
-        // GET: Clientes/Create
+        // Crear GET
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Clientes/Create
+        // Crear POST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nombre,Apellido,Email,Telefono,FechaRegistro")] Cliente cliente)
@@ -63,31 +88,23 @@ namespace EVA_2.Controllers
             return View(cliente);
         }
 
-        // GET: Clientes/Edit/5
+        // Editar GET
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
             var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
+            if (cliente == null) return NotFound();
+
             return View(cliente);
         }
 
-        // POST: Clientes/Edit/5
+        // Editar POST
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Apellido,Email,Telefono,FechaRegistro")] Cliente cliente)
         {
-            if (id != cliente.Id)
-            {
-                return NotFound();
-            }
+            if (id != cliente.Id) return NotFound();
 
             if (ModelState.IsValid)
             {
@@ -98,65 +115,54 @@ namespace EVA_2.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClienteExists(cliente.Id))
-                    {
+                    if (!_context.Clientes.Any(e => e.Id == cliente.Id))
                         return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(cliente);
         }
 
-        // GET: Clientes/Delete/5
+        // Delete GET - Confirmar eliminación
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (id == null) return NotFound();
 
-            var cliente = await _context.Clientes
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (cliente == null)
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Id == id);
+            if (cliente == null) return NotFound();
+
+            // Verificar si tiene citas asociadas para mostrar advertencia
+            bool tieneCitas = await _context.Citas.AnyAsync(cita => cita.ClienteId == id);
+            if (tieneCitas)
             {
-                return NotFound();
+                ViewBag.TieneCitas = true;
+                ViewBag.MensajeAdvertencia = "Este cliente tiene citas asociadas y no puede ser eliminado.";
             }
 
             return View(cliente);
         }
 
-        // POST: Clientes/Delete/5
+        // Delete POST
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var cliente = await _context.Clientes.FindAsync(id);
-            if (cliente == null)
-            {
-                return NotFound();
-            }
+            if (cliente == null) return NotFound();
 
-            bool tieneCitas = await _context.Citas.AnyAsync(c => c.ClienteId == id);
+            bool tieneCitas = await _context.Citas.AnyAsync(cita => cita.ClienteId == id);
             if (tieneCitas)
             {
-                ModelState.AddModelError(string.Empty, "No se puede eliminar el cliente porque tiene citas asociadas.");
-                return View(cliente);
+                TempData["Error"] = "No se puede eliminar el cliente porque tiene citas asociadas.";
+                return View("Delete", cliente);
             }
 
             _context.Clientes.Remove(cliente);
             await _context.SaveChangesAsync();
 
+            TempData["Success"] = "Cliente eliminado correctamente.";
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ClienteExists(int id)
-        {
-            return _context.Clientes.Any(e => e.Id == id);
         }
     }
 }

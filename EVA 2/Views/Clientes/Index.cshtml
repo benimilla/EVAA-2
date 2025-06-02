@@ -1,59 +1,70 @@
 ﻿@model IEnumerable<EVA_2.Models.Cliente>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Clientes";
 }
 
-<h1>Index</h1>
+<h1>Clientes</h1>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
+<p><a asp-action="Create">Crear Nuevo Cliente</a></p>
+
 <table class="table">
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Nombre)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Apellido)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Telefono)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.FechaRegistro)
-            </th>
+            <th>@Html.DisplayNameFor(m => m.Nombre)</th>
+            <th>@Html.DisplayNameFor(m => m.Apellido)</th>
+            <th>@Html.DisplayNameFor(m => m.Email)</th>
+            <th>@Html.DisplayNameFor(m => m.Telefono)</th>
+            <th>@Html.DisplayNameFor(m => m.FechaRegistro)</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nombre)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Apellido)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Telefono)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.FechaRegistro)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var cliente in Model)
+        {
+            <tr>
+                <td>@cliente.Nombre</td>
+                <td>@cliente.Apellido</td>
+                <td>@cliente.Email</td>
+                <td>@cliente.Telefono</td>
+                <td>@cliente.FechaRegistro.ToShortDateString()</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@cliente.Id">Editar</a> |
+                    <a asp-action="Details" asp-route-id="@cliente.Id">Detalles</a> |
+                    <form asp-action="Delete" method="post" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@cliente.Id" />
+                        <button type="submit" class="btn btn-link p-0" onclick="return confirm('¿Seguro que deseas eliminar este cliente?');">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
+
+<div>
+    Página @ViewBag.PaginaActual de @ViewBag.TotalPaginas
+</div>
+<div>
+    @if (ViewBag.PaginaActual > 1)
+    {
+        <a asp-action="Index" asp-route-page="@(ViewBag.PaginaActual - 1)">Anterior</a>
+    }
+
+    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
+    {
+        if (i == ViewBag.PaginaActual)
+        {
+            <strong>@i</strong>
+        }
+        else
+        {
+            <a asp-action="Index" asp-route-page="@i">@i</a>
+        }
+    }
+
+    @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
+    {
+        <a asp-action="Index" asp-route-page="@(ViewBag.PaginaActual + 1)">Siguiente</a>
+    }
+</div>

@@ -47,6 +47,7 @@ namespace EVA_2.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.Fecha).IsRequired();
                 entity.Property(e => e.Hora).IsRequired();
+                entity.Property(e => e.FechaCambioEstado).IsRequired(false);
 
                 entity.HasOne(e => e.Cliente)
                       .WithMany()
@@ -59,8 +60,9 @@ namespace EVA_2.Data
                       .OnDelete(DeleteBehavior.Cascade);
             });
 
+
             // Relación con Estado
-   
+
 
         }
     }

@@ -1,13 +1,24 @@
-﻿namespace EVA_2.Models
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace EVA_2.Models
 {
     public class Cliente
     {
         public int Id { get; set; }
-        public string Nombre { get; set; } = null!;
-        public string Apellido { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public string Telefono { get; set; } = null!;
+
+        [Required]
+        public string Nombre { get; set; }
+
+        [Required]
+        public string Apellido { get; set; }
+
+        [EmailAddress]
+        public string Email { get; set; }
+
+        public string Telefono { get; set; }
+
+        [DataType(DataType.Date)]
         public DateTime FechaRegistro { get; set; }
-        
     }
 }

@@ -1,65 +1,110 @@
 ﻿@model IEnumerable<EVA_2.Models.Cita>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Lista de Citas";
+    var filtroFecha = ViewBag.FiltroFecha as string ?? "";
+    var filtroEstado = ViewBag.FiltroEstado as string ?? "";
 }
 
-<h1>Index</h1>
+<h1>Lista de Citas</h1>
+
+<form method="get" class="form-inline mb-3">
+    <div class="form-group mr-2">
+        <label for="fecha" class="mr-1">Fecha:</label>
+        <input type="date" name="fecha" id="fecha" class="form-control" value="@filtroFecha" />
+    </div>
+    
+    <div class="form-group mr-2">
+        <label for="clienteId" class="mr-1">Cliente:</label>
+        <select name="clienteId" id="clienteId" class="form-control">
+            <option value="">-- Todos --</option>
+            @if (ViewBag.Clientes != null)
+            {
+                @foreach (var cliente in (SelectList)ViewBag.Clientes)
+                {
+                    @:<option value="@cliente.Value">@cliente.Text</option>
+                }
+            }
+        </select>
+    </div>
+    
+    <div class="form-group mr-2">
+        <label for="estado" class="mr-1">Estado:</label>
+        <select name="estado" id="estado" class="form-control">
+            <option value="">-- Todos --</option>
+            @if (ViewBag.Estados != null)
+            {
+                @foreach (var estadoItem in (SelectList)ViewBag.Estados)
+                {
+                    var selected = string.Equals(estadoItem.Value, filtroEstado, StringComparison.OrdinalIgnoreCase) ? "selected" : "";
+                    @:<option value="@estadoItem.Value" @selected>@estadoItem.Text</option>
+                }
+            }
+        </select>
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+    <a asp-action="Index" class="btn btn-secondary ml-2">Limpiar</a>
+</form>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-success">Crear Nueva Cita</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Cliente)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Servicio)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Fecha)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Hora)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Estado)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Comentarios)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Cliente.Apellido)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Servicio.Descripcion)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Fecha)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Hora)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Estado)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Comentarios)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Servicio</th>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Estado</th>
+                <th>Comentarios</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @if (item.Cliente != null)
+                        {
+                            @($"{item.Cliente.Nombre} {item.Cliente.Apellido}")
+                        }
+                        else
+                        {
+                            @("Sin Cliente")
+                        }
+                    </td>
+                    <td>
+                        @if (item.Servicio != null)
+                        {
+                            @item.Servicio.Nombre
+                        }
+                        else
+                        {
+                            @("Sin Servicio")
+                        }
+                    </td>
+                    <td>@item.Fecha.ToString("dd/MM/yyyy")</td>
+                    <td>@item.Hora.ToString(@"hh\:mm")</td>
+                    <td>@(item.Estado ?? "Sin Estado")</td>
+                    <td>@(string.IsNullOrEmpty(item.Comentarios) ? "-" : item.Comentarios)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Editar</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalles</a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Eliminar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
-    </tbody>
-</table>
+else
+{
+    <div class="alert alert-info">
+        <p>No se encontraron citas con los filtros aplicados.</p>
+    </div>
+}
