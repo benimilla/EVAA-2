@@ -1,0 +1,51 @@
+﻿@model IEnumerable<EVA_2.Models.ReportesPorPeriodo>
+
+@{
+    ViewData["Title"] = "Reportes Por Periodo";
+}
+
+<h2>Reporte de Citas por Período</h2>
+
+<form method="get" class="form-inline mb-3">
+    <label>Desde:</label>
+    <input type="date" name="desde" class="form-control mx-2" value="@ViewBag.FechaInicio" />
+
+    <label>Hasta:</label>
+    <input type="date" name="hasta" class="form-control mx-2" value="@ViewBag.FechaFin" />
+
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+</form>
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Cliente</th>
+            <th>Servicio</th>
+            <th>Estado</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cita in Model)
+        {
+            <tr>
+                <td>@cita.Fecha.ToShortDateString()</td>
+                <td>@cita.Hora</td>
+                <td>@cita.Cliente</td>
+                <td>@cita.Servicio</td>
+                <td>@cita.Estado</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="mt-4">
+    <h4>Totales por Estado:</h4>
+    <ul>
+        <li><strong>Pendientes:</strong> @ViewBag.TotalPendientes</li>
+        <li><strong>Confirmadas:</strong> @ViewBag.TotalConfirmadas</li>
+        <li><strong>Completadas:</strong> @ViewBag.TotalCompletadas</li>
+        <li><strong>Canceladas:</strong> @ViewBag.TotalCanceladas</li>
+    </ul>
+</div>
