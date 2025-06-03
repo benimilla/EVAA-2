@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using EVA_2.Data;
+using EVA_2.Models;
 
 namespace EVA_2.Controllers
 {
