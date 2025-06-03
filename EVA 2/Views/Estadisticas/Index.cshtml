@@ -1,28 +1,45 @@
-﻿@{  
-}  
-
-<h2>Estadísticas de Servicios</h2>  
-
-
-
-</form>  
-
-            <tr>  
-                <th>Cantidad de Citas</th>  
-            </tr>  
-        </thead>  
-        <tbody>  
-            {  
-                <tr>  
-                    <td>@item.Nombre</td>  
-                    <td>@item.Cantidad</td>  
-                </tr>  
-            }  
-        </tbody>  
-    </table>  
-}  
-else  
-{  
+﻿@{
+    ViewBag.Title = "Estadísticas de Servicios";
+    var estadisticas = ViewBag.EstadisticasServicios as IEnumerable<dynamic>;
+    string fechaInicio = ViewBag.FechaInicio ?? "";
+    string fechaFin = ViewBag.FechaFin ?? "";
 }
+
+<h2>Estadísticas de Servicios</h2>
+
+<form method="get" asp-controller="Estadisticas" asp-action="Index" class="form-inline mb-3">
+    <label for="fechaInicio" class="mr-2">Fecha Inicio:</label>
+    <input type="date" id="fechaInicio" name="fechaInicio" value="@fechaInicio" class="form-control mr-3" />
+
+    <label for="fechaFin" class="mr-2">Fecha Fin:</label>
+    <input type="date" id="fechaFin" name="fechaFin" value="@fechaFin" class="form-control mr-3" />
+
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre Servicio</th>
+            <th>Cantidad de Citas</th>
+            <th>Ingresos Totales</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (estadisticas != null && estadisticas.Any())
+        {
+            foreach (var item in estadisticas)
+            {
+                <tr>
+                    <td>@item.Nombre</td>
+                    <td>@item.Cantidad</td>
+                    <td>@String.Format("{0:C}", item.Ingresos)</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="3">No hay datos para mostrar.</td></tr>
+        }
     </tbody>
 </table>
