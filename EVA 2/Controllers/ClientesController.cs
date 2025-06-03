@@ -18,7 +18,7 @@ namespace EVA_2.Controllers
             _context = context;
         }
 
-        // Index con paginación y orden (por nombre o fecha)
+        // GET: Clientes
         public async Task<IActionResult> Index(string sortOrder, int page = 1)
         {
             ViewBag.NombreSortParm = string.IsNullOrEmpty(sortOrder) ? "nombre_desc" : "";
@@ -26,6 +26,7 @@ namespace EVA_2.Controllers
 
             var clientes = from c in _context.Clientes select c;
 
+            // Ordenamiento
             switch (sortOrder)
             {
                 case "nombre_desc":
@@ -57,7 +58,7 @@ namespace EVA_2.Controllers
             return View(clientesPaginados);
         }
 
-        // Detalles
+        // GET: Clientes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -68,13 +69,13 @@ namespace EVA_2.Controllers
             return View(cliente);
         }
 
-        // Crear GET
+        // GET: Clientes/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // Crear POST
+        // POST: Clientes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nombre,Apellido,Email,Telefono,FechaRegistro")] Cliente cliente)
@@ -88,7 +89,7 @@ namespace EVA_2.Controllers
             return View(cliente);
         }
 
-        // Editar GET
+        // GET: Clientes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -99,7 +100,7 @@ namespace EVA_2.Controllers
             return View(cliente);
         }
 
-        // Editar POST
+        // POST: Clientes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Nombre,Apellido,Email,Telefono,FechaRegistro")] Cliente cliente)
@@ -117,14 +118,15 @@ namespace EVA_2.Controllers
                 {
                     if (!_context.Clientes.Any(e => e.Id == cliente.Id))
                         return NotFound();
-                    else throw;
+                    else
+                        throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
             return View(cliente);
         }
 
-        // Delete GET - Confirmar eliminación
+        // GET: Clientes/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -132,7 +134,6 @@ namespace EVA_2.Controllers
             var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Id == id);
             if (cliente == null) return NotFound();
 
-            // Verificar si tiene citas asociadas para mostrar advertencia
             bool tieneCitas = await _context.Citas.AnyAsync(cita => cita.ClienteId == id);
             if (tieneCitas)
             {
@@ -143,7 +144,7 @@ namespace EVA_2.Controllers
             return View(cliente);
         }
 
-        // Delete POST
+        // POST: Clientes/DeleteConfirmed
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

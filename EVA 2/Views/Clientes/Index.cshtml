@@ -2,20 +2,33 @@
 
 @{
     ViewData["Title"] = "Clientes";
+    int paginaActual = ViewBag.PaginaActual ?? 1;
+    int totalPaginas = ViewBag.TotalPaginas ?? 1;
+    string sortOrder = ViewBag.SortOrder as string ?? "";
 }
 
 <h1>Clientes</h1>
 
-<p><a asp-action="Create">Crear Nuevo Cliente</a></p>
+<p>
+    <a asp-action="Create">Crear Nuevo Cliente</a>
+</p>
 
-<table class="table">
+<table class="table table-bordered">
     <thead>
         <tr>
-            <th>@Html.DisplayNameFor(m => m.Nombre)</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@(sortOrder == "nombre_desc" ? "" : "nombre_desc")" asp-route-page="1">
+                    Nombre @(sortOrder == "nombre_desc" ? "▼" : sortOrder == "" ? "▲" : "")
+                </a>
+            </th>
             <th>@Html.DisplayNameFor(m => m.Apellido)</th>
             <th>@Html.DisplayNameFor(m => m.Email)</th>
             <th>@Html.DisplayNameFor(m => m.Telefono)</th>
-            <th>@Html.DisplayNameFor(m => m.FechaRegistro)</th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@(sortOrder == "fecha" ? "fecha_desc" : "fecha")" asp-route-page="1">
+                    Fecha de Registro @(sortOrder == "fecha" ? "▲" : sortOrder == "fecha_desc" ? "▼" : "")
+                </a>
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -42,29 +55,37 @@
     </tbody>
 </table>
 
-<div>
-    Página @ViewBag.PaginaActual de @ViewBag.TotalPaginas
-</div>
-<div>
-    @if (ViewBag.PaginaActual > 1)
-    {
-        <a asp-action="Index" asp-route-page="@(ViewBag.PaginaActual - 1)">Anterior</a>
-    }
-
-    @for (int i = 1; i <= ViewBag.TotalPaginas; i++)
-    {
-        if (i == ViewBag.PaginaActual)
+<!-- Paginación -->
+<nav>
+    <ul class="pagination">
+        @if (paginaActual > 1)
         {
-            <strong>@i</strong>
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-page="@(paginaActual - 1)" asp-route-sortOrder="@sortOrder">Anterior</a>
+            </li>
         }
-        else
-        {
-            <a asp-action="Index" asp-route-page="@i">@i</a>
-        }
-    }
 
-    @if (ViewBag.PaginaActual < ViewBag.TotalPaginas)
-    {
-        <a asp-action="Index" asp-route-page="@(ViewBag.PaginaActual + 1)">Siguiente</a>
-    }
-</div>
+        @for (int i = 1; i <= totalPaginas; i++)
+        {
+            if (i == paginaActual)
+            {
+                <li class="page-item active">
+                    <span class="page-link">@i</span>
+                </li>
+            }
+            else
+            {
+                <li class="page-item">
+                    <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-sortOrder="@sortOrder">@i</a>
+                </li>
+            }
+        }
+
+        @if (paginaActual < totalPaginas)
+        {
+            <li class="page-item">
+                <a class="page-link" asp-action="Index" asp-route-page="@(paginaActual + 1)" asp-route-sortOrder="@sortOrder">Siguiente</a>
+            </li>
+        }
+    </ul>
+</nav>
