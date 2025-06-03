@@ -14,10 +14,15 @@ namespace EVA_2.Data
         public DbSet<Cliente> Clientes { get; set; }
         public DbSet<Servicio> Servicios { get; set; }
         public DbSet<Cita> Citas { get; set; }
+        public DbSet<ReportesPorPeriodo> VistaReporteCitas { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
+            // Vista ReportesPorPeriodo
+            modelBuilder.Entity<ReportesPorPeriodo>()
+                .HasNoKey()
+                .ToView("Vista_ReporteCitas"); // Asegúrate de que el nombre coincide con la vista creada en SQLite
             // Cliente
             modelBuilder.Entity<Cliente>(entity =>
             {

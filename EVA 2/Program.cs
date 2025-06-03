@@ -1,7 +1,6 @@
 using System;
 using EVA_2.Data;
 using Microsoft.EntityFrameworkCore;
-
 using System.Globalization;
 using Microsoft.AspNetCore.Localization;
 
