@@ -52,55 +52,85 @@
 
 @if (Model != null && Model.Any())
 {
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Cliente</th>
-                <th>Servicio</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Estado</th>
-                <th>Comentarios</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        @if (item.Cliente != null)
+    <div class="container">
+        <div class="row">
+            <!-- Columna izquierda con la tabla -->
+            <div class="col-md-8">
+                <table class="table table-striped text-center">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Servicio</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Comentarios</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
                         {
-                            @($"{item.Cliente.Nombre} {item.Cliente.Apellido}")
+                            <tr>
+                                <td>
+                                    @if (item.Cliente != null)
+                                    {
+                                        @($"{item.Cliente.Nombre} {item.Cliente.Apellido}")
+                                    }
+                                    else
+                                    {
+                                        @("Sin Cliente")
+                                    }
+                                </td>
+                                <td>
+                                    @if (item.Servicio != null)
+                                    {
+                                        @item.Servicio.Nombre
+                                    }
+                                    else
+                                    {
+                                        @("Sin Servicio")
+                                    }
+                                </td>
+                                <td>@item.Fecha.ToString("dd/MM/yyyy")</td>
+                                <td>@item.Hora.ToString(@"hh\:mm")</td>
+                                <td>@(item.Estado ?? "Sin Estado")</td>
+                                <td>@(string.IsNullOrEmpty(item.Comentarios) ? "-" : item.Comentarios)</td>
+                                <td>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Editar</a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalles</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Eliminar</a>
+                                </td>
+                            </tr>
                         }
-                        else
-                        {
-                            @("Sin Cliente")
-                        }
-                    </td>
-                    <td>
-                        @if (item.Servicio != null)
-                        {
-                            @item.Servicio.Nombre
-                        }
-                        else
-                        {
-                            @("Sin Servicio")
-                        }
-                    </td>
-                    <td>@item.Fecha.ToString("dd/MM/yyyy")</td>
-                    <td>@item.Hora.ToString(@"hh\:mm")</td>
-                    <td>@(item.Estado ?? "Sin Estado")</td>
-                    <td>@(string.IsNullOrEmpty(item.Comentarios) ? "-" : item.Comentarios)</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Editar</a>
-                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Detalles</a>
-                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Eliminar</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Columna derecha con placeholder -->
+            <div class="col-md-4">
+                <div id="calendar"></div>
+                  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth', // Cambia a 'timeGridWeek' para semanal
+            locale: 'es', // Español
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek'
+            },
+            events: '/Citas/GetEventos', // Endpoint que retorna JSON con citas
+        });
+        calendar.render();
+    });
+</script>
+                
+        
+            </div>
+        </div>
+    </div>
 }
 else
 {
