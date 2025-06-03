@@ -1,0 +1,62 @@
+﻿body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #f8f9fa, #e3f2fd);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    animation: fadeInBody 0.8s ease-in;
+}
+
+@keyframes fadeInBody {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+main {
+    animation: fadeInMain 0.6s ease-in;
+}
+
+@keyframes fadeInMain {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+header .navbar {
+    background: linear-gradient(to right, #0d6efd, #6610f2);
+}
+
+header .navbar-brand,
+header .nav-link {
+    color: white !important;
+    font-weight: 600;
+    transition: color 0.3s;
+}
+
+    header .nav-link:hover {
+        color: #ffc107 !important;
+    }
+
+footer {
+    margin-top: auto;
+    padding: 1rem 0;
+    background-color: #212529;
+    color: #ccc;
+    text-align: center;
+}
+
+    footer a {
+        color: #ffc107;
+        text-decoration: none;
+    }
