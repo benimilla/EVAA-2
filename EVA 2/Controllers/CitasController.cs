@@ -19,18 +19,14 @@ namespace EVA_2.Controllers
             _context = context;
         }
 
-        // Index con filtros por fecha, cliente y estado
         public IActionResult Index(string fecha, string clienteId, string estado)
         {
-            // Configurar ViewBag
             ViewBag.FiltroFecha = fecha ?? "";
             ViewBag.FiltroEstado = estado ?? "";
 
-            // Obtener clientes para el dropdown
             var clientes = _context.Clientes.ToList();
             ViewBag.Clientes = new SelectList(clientes, "Id", "Nombre", clienteId);
 
-            // Configurar estados
             var estados = new List<SelectListItem>
             {
                 new SelectListItem { Value = "Pendiente", Text = "Pendiente" },
@@ -40,18 +36,15 @@ namespace EVA_2.Controllers
             };
             ViewBag.Estados = new SelectList(estados, "Value", "Text", estado);
 
-            // Consulta base con includes - SIN filtro de null
             var citas = _context.Citas
                 .Include(c => c.Cliente)
                 .Include(c => c.Servicio)
                 .AsQueryable();
 
-            // Aplicar filtros solo si tienen valores
             if (!string.IsNullOrEmpty(fecha))
             {
                 if (DateTime.TryParse(fecha, out DateTime fechaDate))
                 {
-                    // Para SQLite: comparar el rango completo del día
                     var fechaInicio = fechaDate.Date;
                     var fechaFin = fechaDate.Date.AddDays(1);
                     citas = citas.Where(c => c.Fecha >= fechaInicio && c.Fecha < fechaFin);
@@ -68,13 +61,31 @@ namespace EVA_2.Controllers
                 citas = citas.Where(c => c.Estado == estado);
             }
 
-            // Ejecutar la consulta primero, luego ordenar en memoria
             var lista = citas.ToList();
-
-            // Ordenar en memoria (compatible con SQLite)
             lista = lista.OrderBy(c => c.Fecha).ThenBy(c => c.Hora).ToList();
 
             return View(lista);
+        }
+
+        [HttpGet]
+        public IActionResult GetEventos()
+        {
+            var citas = _context.Citas
+                .Include(c => c.Cliente)
+                .Include(c => c.Servicio)
+                .ToList();  // Fuerza la carga de datos antes de proyectar
+
+            var eventos = citas.Select(c => new
+            {
+                id = c.Id,
+                title = (c.Cliente != null ? c.Cliente.Nombre + " " + c.Cliente.Apellido : "Sin Cliente") +
+                        " - " +
+                        (c.Servicio != null ? c.Servicio.Nombre : "Sin Servicio"),
+                start = c.Fecha.Add(c.Hora).ToString("s"), // fecha y hora en formato ISO 8601
+                allDay = false
+            }).ToList();
+
+            return Json(eventos);
         }
 
         public async Task<IActionResult> Details(int? id)

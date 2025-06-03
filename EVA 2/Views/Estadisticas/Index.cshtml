@@ -1,0 +1,54 @@
+﻿@{  
+    ViewData["Title"] = "Estadísticas de Servicios";  
+    var estadisticas = ViewBag.EstadisticasServicios as List<dynamic>;  
+    string fechaInicio = ViewBag.FechaInicio;  
+    string fechaFin = ViewBag.FechaFin;  
+    string filtro = ViewBag.Filtro ?? "";  
+}  
+
+<h2>Estadísticas de Servicios</h2>  
+
+<form method="get" class="mb-4">  
+    <div>  
+        <label>Fecha Inicio:</label>  
+        <input type="date" name="fechaInicio" value="@fechaInicio" required />  
+
+        <label>Fecha Fin:</label>  
+        <input type="date" name="fechaFin" value="@fechaFin" required />  
+
+        <label>Filtro:</label>  
+        <select name="filtro">  
+            <option value="" selected="@((filtro == "") ? "true" : "false")">Todos los servicios</option>  
+            <option value="masSolicitados" selected="@((filtro == "masSolicitados") ? "true" : "false")">Más solicitados</option>  
+        </select>  
+
+        <button type="submit">Filtrar</button>  
+    </div>  
+</form>  
+
+@if (estadisticas != null && estadisticas.Any())  
+{  
+    <table border="1" cellpadding="8" cellspacing="0" style="width:100%; margin-top:20px;">  
+        <thead style="background-color:#f2f2f2;">  
+            <tr>  
+                <th>Nombre del Servicio</th>  
+                <th>Cantidad de Citas</th>  
+                <th>Ingresos Generados</th>  
+            </tr>  
+        </thead>  
+        <tbody>  
+            @foreach (dynamic item in estadisticas)  
+            {  
+                <tr>  
+                    <td>@item.Nombre</td>  
+                    <td>@item.Cantidad</td>  
+                    <td>$@String.Format("{0:N2}", item.Ingresos)</td>  
+                </tr>  
+            }  
+        </tbody>  
+    </table>  
+}  
+else  
+{  
+    <p>No hay datos disponibles para el rango de fechas seleccionado.</p>  
+}
