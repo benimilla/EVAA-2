@@ -21,32 +21,54 @@ namespace EVA_2.Controllers
         // GET: Clientes
         public async Task<IActionResult> Index(string sortOrder, int page = 1)
         {
+            // Verifica si la tabla está vacía
+            if (!_context.Clientes.Any())
+            {
+                var clientes = new Cliente[]
+                {
+            new Cliente { Nombre = "Carlos", Apellido = "García", Email = "carlos@example.com", Telefono = "1234567890", FechaRegistro = DateTime.Now.AddDays(-10) },
+            new Cliente { Nombre = "Ana", Apellido = "Martínez", Email = "ana@example.com", Telefono = "1234567891", FechaRegistro = DateTime.Now.AddDays(-9) },
+            new Cliente { Nombre = "Juan", Apellido = "Pérez", Email = "juan@example.com", Telefono = "1234567892", FechaRegistro = DateTime.Now.AddDays(-8) },
+            new Cliente { Nombre = "Laura", Apellido = "Sánchez", Email = "laura@example.com", Telefono = "1234567893", FechaRegistro = DateTime.Now.AddDays(-7) },
+            new Cliente { Nombre = "Miguel", Apellido = "Torres", Email = "miguel@example.com", Telefono = "1234567894", FechaRegistro = DateTime.Now.AddDays(-6) },
+            new Cliente { Nombre = "María", Apellido = "López", Email = "maria@example.com", Telefono = "1234567895", FechaRegistro = DateTime.Now.AddDays(-5) },
+            new Cliente { Nombre = "José", Apellido = "Hernández", Email = "jose@example.com", Telefono = "1234567896", FechaRegistro = DateTime.Now.AddDays(-4) },
+            new Cliente { Nombre = "Elena", Apellido = "Díaz", Email = "elena@example.com", Telefono = "1234567897", FechaRegistro = DateTime.Now.AddDays(-3) },
+            new Cliente { Nombre = "Pedro", Apellido = "Ruiz", Email = "pedro@example.com", Telefono = "1234567898", FechaRegistro = DateTime.Now.AddDays(-2) },
+            new Cliente { Nombre = "Isabel", Apellido = "Romero", Email = "isabel@example.com", Telefono = "1234567899", FechaRegistro = DateTime.Now.AddDays(-1) },
+            new Cliente { Nombre = "Wenaloco", Apellido = "Anashe", Email = "isabel@example.com", Telefono = "1234567899", FechaRegistro = DateTime.Now.AddDays(-1) }
+                };
+
+                _context.Clientes.AddRange(clientes);
+                await _context.SaveChangesAsync();
+            }
+
+            // Ordenamiento
             ViewBag.NombreSortParm = string.IsNullOrEmpty(sortOrder) ? "nombre_desc" : "";
             ViewBag.FechaSortParm = sortOrder == "fecha" ? "fecha_desc" : "fecha";
 
-            var clientes = from c in _context.Clientes select c;
+            var clientesQuery = from c in _context.Clientes select c;
 
-            // Ordenamiento
             switch (sortOrder)
             {
                 case "nombre_desc":
-                    clientes = clientes.OrderByDescending(c => c.Nombre);
+                    clientesQuery = clientesQuery.OrderByDescending(c => c.Nombre);
                     break;
                 case "fecha":
-                    clientes = clientes.OrderBy(c => c.FechaRegistro);
+                    clientesQuery = clientesQuery.OrderBy(c => c.FechaRegistro);
                     break;
                 case "fecha_desc":
-                    clientes = clientes.OrderByDescending(c => c.FechaRegistro);
+                    clientesQuery = clientesQuery.OrderByDescending(c => c.FechaRegistro);
                     break;
                 default:
-                    clientes = clientes.OrderBy(c => c.Nombre);
+                    clientesQuery = clientesQuery.OrderBy(c => c.Nombre);
                     break;
             }
 
-            var totalClientes = await clientes.CountAsync();
+            var totalClientes = await clientesQuery.CountAsync();
             var totalPaginas = (int)Math.Ceiling((double)totalClientes / pageSize);
 
-            var clientesPaginados = await clientes
+            var clientesPaginados = await clientesQuery
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
@@ -57,6 +79,7 @@ namespace EVA_2.Controllers
 
             return View(clientesPaginados);
         }
+
 
         // GET: Clientes/Details/5
         public async Task<IActionResult> Details(int? id)

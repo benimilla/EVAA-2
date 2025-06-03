@@ -64,6 +64,7 @@
                             <th>Fecha</th>
                             <th>Hora</th>
                             <th>Estado</th>
+                            <th>Fecha Cambio Estado</th> <!-- Nueva columna -->
                             <th>Comentarios</th>
                             <th>Acciones</th>
                         </tr>
@@ -95,6 +96,11 @@
                                 <td>@item.Fecha.ToString("dd/MM/yyyy")</td>
                                 <td>@item.Hora.ToString(@"hh\:mm")</td>
                                 <td>@(item.Estado ?? "Sin Estado")</td>
+                                <td>
+                                    @(item.FechaCambioEstado.HasValue 
+                                        ? item.FechaCambioEstado.Value.ToString("dd/MM/yyyy HH:mm") 
+                                        : "-")
+                                </td>
                                 <td>@(string.IsNullOrEmpty(item.Comentarios) ? "-" : item.Comentarios)</td>
                                 <td>
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">Editar</a>

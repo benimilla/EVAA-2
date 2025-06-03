@@ -186,7 +186,6 @@ namespace EVA_2.Controllers
             if (id != cita.Id)
                 return NotFound();
 
-            // Validar solapamiento excluyendo la cita actual (por Id)
             bool existeSolapamiento = _context.Citas.Any(c =>
                 c.Id != cita.Id &&
                 c.Fecha == cita.Fecha &&
@@ -202,17 +201,14 @@ namespace EVA_2.Controllers
             {
                 try
                 {
-                    // Obtener la cita original para comparar estado
                     var citaOriginal = await _context.Citas.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
 
-                    // Si cambió el estado, actualizar fecha y hora del cambio
                     if (citaOriginal != null && citaOriginal.Estado != cita.Estado)
                     {
                         cita.FechaCambioEstado = DateTime.Now;
                     }
                     else
                     {
-                        // Mantener la fecha de cambio si no cambia el estado
                         cita.FechaCambioEstado = citaOriginal?.FechaCambioEstado;
                     }
 
@@ -229,6 +225,7 @@ namespace EVA_2.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
+            // Recarga datos para la vista en caso de error
             ViewBag.ClienteId = _context.Clientes
                 .Select(c => new SelectListItem
                 {
@@ -242,6 +239,7 @@ namespace EVA_2.Controllers
 
             return View(cita);
         }
+
 
         public async Task<IActionResult> Delete(int? id)
         {
