@@ -1,15 +1,17 @@
 ﻿@{
-    ViewBag.Title = "Estadísticas de Servicios";
-    var estadisticas = ViewBag.EstadisticasServicios as IEnumerable<dynamic>;
-    string fechaInicio = ViewBag.FechaInicio ?? "";
-    string fechaFin = ViewBag.FechaFin ?? "";
+    ViewData["Title"] = "Estadísticas de Servicios";
+    var estadisticas = ViewBag.EstadisticasServicios as List<dynamic>;
+    string fechaInicio = ViewBag.FechaInicio;
+    string fechaFin = ViewBag.FechaFin;
+    string filtro = ViewBag.Filtro ?? "";
 }
 
 <h2>Estadísticas de Servicios</h2>
 
-<form method="get" asp-controller="Estadisticas" asp-action="Index" class="form-inline mb-3">
-    <label for="fechaInicio" class="mr-2">Fecha Inicio:</label>
-    <input type="date" id="fechaInicio" name="fechaInicio" value="@fechaInicio" class="form-control mr-3" />
+<form method="get" class="mb-4">
+    <div>
+        <label>Fecha Inicio:</label>
+        <input type="date" name="fechaInicio" value="@fechaInicio" required />
 
     <label for="fechaFin" class="mr-2">Fecha Fin:</label>
     <input type="date" id="fechaFin" name="fechaFin" value="@fechaFin" class="form-control mr-3" />
@@ -17,7 +19,7 @@
     <button type="submit" class="btn btn-primary">Filtrar</button>
 </form>
 
-<table class="table table-bordered">
+@if (estadisticas != null && estadisticas.Any())
     <thead>
         <tr>
             <th>Nombre Servicio</th>
@@ -26,9 +28,7 @@
         </tr>
     </thead>
     <tbody>
-        @if (estadisticas != null && estadisticas.Any())
-        {
-            foreach (var item in estadisticas)
+            @foreach (var item in estadisticas)
             {
                 <tr>
                     <td>@item.Nombre</td>

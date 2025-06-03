@@ -19,10 +19,8 @@ namespace EVA_2.Controllers
         // GET: Estadisticas
         public async Task<IActionResult> Index(DateTime? fechaInicio, DateTime? fechaFin)
         {
-            // Si no se especifica rango, usar último mes por defecto
             if (!fechaInicio.HasValue)
                 fechaInicio = DateTime.Today.AddMonths(-1);
-
             if (!fechaFin.HasValue)
                 fechaFin = DateTime.Today;
 
