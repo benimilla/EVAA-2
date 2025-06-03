@@ -16,24 +16,17 @@ namespace EVA_2.Controllers
         {
             _context = context;
         }
-
-        // GET: Estadisticas
-        public async Task<IActionResult> Index(DateTime? fechaInicio, DateTime? fechaFin)
+        public async Task<IActionResult> Index(DateTime? fechaInicio, DateTime? fechaFin, string filtro)
         {
-            // Si no se especifica rango, usar último mes por defecto
             if (!fechaInicio.HasValue)
                 fechaInicio = DateTime.Today.AddMonths(-1);
-
             if (!fechaFin.HasValue)
                 fechaFin = DateTime.Today;
 
-            // Consultar citas dentro del rango de fechas (inclusive)
             var citasFiltradas = _context.Citas
                 .Include(c => c.Servicio)
                 .Where(c => c.Fecha >= fechaInicio && c.Fecha <= fechaFin);
 
-            // Aquí agrupamos y calculamos cantidad e ingresos juntos
-            var estadisticasServicios = await citasFiltradas
             List<dynamic> estadisticasServicios;
 
             if (filtro == "masSolicitados")
@@ -63,8 +56,6 @@ namespace EVA_2.Controllers
                     .OrderByDescending(x => x.Cantidad)
                     .ToListAsync<dynamic>();
             }
-               .OrderByDescending(x => x.Cantidad) // ordenas por cantidad o por ingresos según prefieras
-               .ToListAsync();
 
             ViewBag.FechaInicio = fechaInicio.Value.ToString("yyyy-MM-dd");
             ViewBag.FechaFin = fechaFin.Value.ToString("yyyy-MM-dd");
